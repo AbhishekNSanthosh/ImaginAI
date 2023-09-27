@@ -1,15 +1,93 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from './Home.module.css'
+import axios from 'axios';
+import bg1 from '../../assets/bg1.jpg'
+import bg2 from '../../assets/bg2.jpg'
+import bg3 from '../../assets/bg3.jpg'
+import bg4 from '../../assets/bg4.jpg'
+import bg5 from '../../assets/bg5.jpg'
+import bg6 from '../../assets/bg6.jpg'
+import bg7 from '../../assets/bg7.jpg'
+import bg8 from '../../assets/bg8.jpg'
+import bg9 from '../../assets/bg9.jpg'
+import { GridLoader } from 'react-spinners'
 
 const Home = () => {
 
     const [backgroundImage, setBackgroundImage] = useState("");
+    const [query, setQuery] = useState("");
+    const [highlightColor, setHighLightColor] = useState('rgb(0, 255, 8)')
+    const [imageUrl, setImageUrl] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const backgroundImageUrls = ['https://img.freepik.com/free-photo/sunny-lake-landscape_1112-155.jpg?w=826&t=st=1695821133~exp=1695821733~hmac=ccf9678b5d025af0fa3e24fb1c82920a0d6b418ab4d5961199e7aec8fb2b9af4', 'https://img.freepik.com/free-photo/golden-hour-early-morning-before-sunrise-lake-tahoe-california_333098-130.jpg?w=740&t=st=1695822095~exp=1695822695~hmac=f193110792fdf768526ddc57f7125384506acf1f14501cad036c01158038393c', 'https://img.freepik.com/premium-photo/wooded-bridge-by-sea-with-sunset-sky_167657-564.jpg?w=826',];
+    let inputRef = useRef(null);
+
+    const backgroundImageUrls = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9];
+    const colors = ['rgb(0, 255, 8)', 'rgb(255, 0, 0)', 'rgb(255, 0, 212)', ' rgb(89, 0, 255)', 'rgb(255, 217, 0)', 'rgb(255, 102, 0)']
     useEffect(() => {
         const randomIndex = Math.floor(Math.random() * backgroundImageUrls.length);
         setBackgroundImage(backgroundImageUrls[randomIndex]);
     }, []);
+
+
+    useEffect(() => {
+        const randomIndex = Math.floor(Math.random() * colors.length);
+        setHighLightColor(colors[randomIndex]);
+    }, []);
+
+
+    // const handleSubmit = async () => {
+    //     console.log("called")
+    //     await axios.post('https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5', {
+    //         inputs: query
+
+    //     }, {
+    //         headers: {
+    //             Authorization: "Bearer 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"
+    //         }
+    //     }).then((res) => {
+    //         console.log(res.data)
+    //         // res.blob()
+    //         setImageUrl(URL.createObjectURL(res.data))
+    //     }).catch((err) => {
+    //         console.log(err)
+    //     })
+    // }
+
+    const handleSubmit = async () => {
+        console.log("called");
+        setImageUrl('');
+        setIsLoading(true);
+        try {
+            const response = await axios.post(
+                'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
+                {
+                    inputs: query
+                },
+                {
+                    headers: {
+                        Authorization: "Bearer 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"
+                    },
+                    responseType: 'blob' // Request the response as a binary blob
+                }
+            );
+
+            // Create a blob object from the response data
+            const blob = new Blob([response.data], { type: 'image/png' }); // Adjust the type as needed
+
+            // Create a URL for the blob and set it as the imageUrl
+            if (response) {
+                setQuery(null);
+            }
+            setImageUrl(URL.createObjectURL(blob));
+            setIsLoading(false);
+        } catch (error) {
+            setIsLoading(false);
+            console.error('Error:', error);
+        }
+    };
+
+
 
     return (
         <div className={styles.container}
@@ -20,25 +98,46 @@ const Home = () => {
                 <div className={styles.wrap}>
                     <div className={styles.row}>
                         <span className={styles.title}>
-                            Imagin <span className={styles.coloured}>Ai</span>
+                            Imagin <span className={styles.coloured} style={{
+                                color: highlightColor
+                            }}>Ai</span>
                         </span>
                         <span className={styles.desc}>
-                            Create amazing artworks in seconds using the power of AI
+                            Generate some amazing pictures in seconds using the power of AI
                         </span>
                     </div>
                     <div className={styles.row}>
-                        <img src="https://img.freepik.com/free-photo/rear-view-programmer-working-all-night-long_1098-18697.jpg?size=626&ext=jpg&uid=R89673306&ga=GA1.2.267313864.1687966910&semt=ais" alt="" className={styles.image} />
+                        {isLoading && <GridLoader color={highlightColor} />}
+                        {isLoading && <p>Please wait...</p>}
+                        {imageUrl && <img src={imageUrl} alt="" style={{
+                            border: `0.1px solid ${highlightColor}`
+                        }} className={styles.image} />}
                     </div>
                     <div className={styles.row}>
                         <div className={styles.actionRow}>
                             <div className={styles.actionRowItemLeft}>
-                                <input type="text" className={styles.input} placeholder='Hey, Generate some images!' />
+                                <input onChange={(e) => {
+                                    setQuery(e.target.value);
+                                }} type="text" className={styles.input} placeholder='Hey, Generate some images!' />
                             </div>
                             <div className={styles.actionRowItemRight}>
-                                <button className={styles.submit}>Generate</button>
+                                <button type='submit' className={styles.submit}
+                                    style={{
+                                        backgroundColor: highlightColor
+                                    }} onClick={() => {
+                                        console.log("e")
+                                        handleSubmit()
+                                    }}>Generate</button>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div className={styles.rowAbout}>
+                    <span className={styles.about}>
+                        Made with &#128157; by <span style={{
+                            color: highlightColor
+                        }}>&nbsp; Abhishek Santhosh</span>
+                    </span>
                 </div>
             </div>
         </div>
