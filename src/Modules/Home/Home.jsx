@@ -20,8 +20,6 @@ const Home = () => {
     const [imageUrl, setImageUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    let inputRef = useRef(null);
-
     const backgroundImageUrls = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9];
     const colors = ['rgb(0, 255, 8)', 'rgb(255, 0, 0)', 'rgb(255, 0, 212)', ' rgb(89, 0, 255)', 'rgb(255, 217, 0)', 'rgb(255, 102, 0)']
     useEffect(() => {
