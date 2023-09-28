@@ -162,7 +162,9 @@ const Home = () => {
                                         if (query != "") {
                                             handleSubmit()
                                         }
-                                    }}>Generate</button>
+                                    }}
+                                    disabled={isLoading}
+                                >Generate</button>
                             </div>
                         </div>
                     </div>
