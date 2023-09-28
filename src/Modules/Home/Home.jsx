@@ -12,6 +12,8 @@ import bg8 from '../../assets/bg8.jpg'
 import bg9 from '../../assets/bg9.jpg'
 import { BeatLoader, GridLoader } from 'react-spinners'
 import toast from 'react-hot-toast';
+import Aos from 'aos';
+import 'aos/dist/aos.css'
 
 const Home = () => {
 
@@ -21,6 +23,10 @@ const Home = () => {
     const [imageUrl, setImageUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [callCount, setCallCount] = useState(0);
+
+    useEffect(() => {
+        Aos.init({duration:1000});
+    }, [])
 
     useEffect(() => {
 
@@ -130,7 +136,7 @@ const Home = () => {
             }}>
             <div className={styles.wrapper}>
                 <div className={styles.wrap}>
-                    <div className={styles.row}>
+                    <div className={styles.row} data-aos="fade-down">
                         <span className={styles.title}>
                             Imagin <span className={styles.coloured} style={{
                                 color: highlightColor
@@ -147,7 +153,7 @@ const Home = () => {
                             border: `0.1px solid ${highlightColor}`
                         }} className={styles.image} />}
                     </div>
-                    <div className={styles.row}>
+                    <div className={styles.row} data-aos="fade-up">
                         <div className={styles.actionRow}>
                             <div className={styles.actionRowItemLeft}>
                                 <input onChange={(e) => {
@@ -169,14 +175,14 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-                <div className={styles.rowAbout}>
+                <div className={styles.rowAbout} >
 
                     <span className={styles.about} >
                         Made with &#128157; by
                         <a className={styles.link} href="https://www.linkedin.com/in/abhishek-santhosh/">
                             <span style={{
                                 color: highlightColor
-                            }}>&nbsp; Abhishek Santhosh</span>
+                            }}>&nbsp; Abhishek&nbsp;Santhosh</span>
                         </a>
                     </span>
                 </div>
