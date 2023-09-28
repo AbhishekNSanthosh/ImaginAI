@@ -10,7 +10,8 @@ import bg6 from '../../assets/bg6.jpg'
 import bg7 from '../../assets/bg7.jpg'
 import bg8 from '../../assets/bg8.jpg'
 import bg9 from '../../assets/bg9.jpg'
-import { GridLoader } from 'react-spinners'
+import { BeatLoader, GridLoader } from 'react-spinners'
+import toast from 'react-hot-toast';
 
 const Home = () => {
 
@@ -19,6 +20,23 @@ const Home = () => {
     const [highlightColor, setHighLightColor] = useState('rgb(0, 255, 8)')
     const [imageUrl, setImageUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [callCount, setCallCount] = useState(0);
+
+    useEffect(() => {
+
+        const storedCallCount = localStorage.getItem('callCount');
+        const storedExpirationTime = localStorage.getItem('expirationTime');
+
+        if (storedCallCount && storedExpirationTime) {
+            const currentTime = Date.now();
+            if (currentTime < parseInt(storedExpirationTime)) {
+                setCallCount(parseInt(storedCallCount));
+            } else {
+                localStorage.removeItem('callCount');
+                localStorage.removeItem('expirationTime');
+            }
+        }
+    }, []);
 
     const backgroundImageUrls = [bg1, bg2, bg3, bg4, bg5, bg6, bg7, bg8, bg9];
     const colors = ['rgb(0, 255, 8)', 'rgb(255, 0, 0)', 'rgb(255, 0, 212)', ' rgb(89, 0, 255)', 'rgb(255, 217, 0)', 'rgb(255, 102, 0)']
@@ -53,39 +71,57 @@ const Home = () => {
     // }
 
     const handleSubmit = async () => {
-        console.log("called");
         setImageUrl('');
-        setIsLoading(true);
-        try {
-            const response = await axios.post(
-                'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
-                {
-                    inputs: query
-                },
-                {
-                    headers: {
-                        Authorization: "Bearer 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"
+        if (callCount < 3) {
+            setIsLoading(true);
+            try {
+                const response = await axios.post(
+                    'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
+                    {
+                        inputs: query
                     },
-                    responseType: 'blob' // Request the response as a binary blob
+                    {
+                        headers: {
+                            Authorization: "Bearer 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"
+                        },
+                        responseType: 'blob' // Request the response as a binary blob
+                    }
+                );
+
+                // Create a blob object from the response data
+                const blob = new Blob([response.data], { type: 'image/png' }); // Adjust the type as needed
+
+                if (response) {
+                    setQuery("");
                 }
-            );
+                setImageUrl(URL.createObjectURL(blob));
+                setIsLoading(false);
+                setCallCount(callCount + 1);
+                localStorage.setItem('callCount', callCount + 1);
+                const expirationTime = Date.now() + 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+                localStorage.setItem('expirationTime', expirationTime.toString());
+            } catch (error) {
+                setIsLoading(false);
+                console.error('Error:', error);
 
-            // Create a blob object from the response data
-            const blob = new Blob([response.data], { type: 'image/png' }); // Adjust the type as needed
-
-            // Create a URL for the blob and set it as the imageUrl
-            if (response) {
-                setQuery(null);
             }
-            setImageUrl(URL.createObjectURL(blob));
-            setIsLoading(false);
-        } catch (error) {
-            setIsLoading(false);
-            console.error('Error:', error);
+        } else {
+            setQuery('');
+            toast.error('Limit exceeded!');
+            setTimeout(() => {
+                toast('Kindly try after 12 hours',
+                    {
+                        icon: '🙁',
+                        style: {
+                            borderRadius: '10px',
+                            background: '#333',
+                            color: '#fff',
+                        },
+                    }
+                );
+            }, 300);
         }
     };
-
-
 
     return (
         <div className={styles.container}
@@ -105,7 +141,7 @@ const Home = () => {
                         </span>
                     </div>
                     <div className={styles.row}>
-                        {isLoading && <GridLoader color={highlightColor} />}
+                        {isLoading && <BeatLoader color={highlightColor} className={styles.mobile} />}
                         {isLoading && <p>Please wait...</p>}
                         {imageUrl && <img src={imageUrl} alt="" style={{
                             border: `0.1px solid ${highlightColor}`
@@ -116,15 +152,16 @@ const Home = () => {
                             <div className={styles.actionRowItemLeft}>
                                 <input onChange={(e) => {
                                     setQuery(e.target.value);
-                                }} type="text" className={styles.input} placeholder='Hey, Generate some images!' />
+                                }} type="text" value={query} className={styles.input} placeholder='Hey, Generate some images!' />
                             </div>
                             <div className={styles.actionRowItemRight}>
                                 <button type='submit' className={styles.submit}
                                     style={{
                                         backgroundColor: highlightColor
                                     }} onClick={() => {
-                                        console.log("e")
-                                        handleSubmit()
+                                        if (query != "") {
+                                            handleSubmit()
+                                        }
                                     }}>Generate</button>
                             </div>
                         </div>
