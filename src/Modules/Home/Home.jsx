@@ -170,14 +170,18 @@ const Home = () => {
                     </div>
                 </div>
                 <div className={styles.rowAbout}>
-                    <span className={styles.about}>
-                        Made with &#128157; by <span style={{
-                            color: highlightColor
-                        }}>&nbsp; Abhishek Santhosh</span>
+
+                    <span className={styles.about} >
+                        Made with &#128157; by
+                        <a className={styles.link} href="https://www.linkedin.com/in/abhishek-santhosh/">
+                            <span style={{
+                                color: highlightColor
+                            }}>&nbsp; Abhishek Santhosh</span>
+                        </a>
                     </span>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
