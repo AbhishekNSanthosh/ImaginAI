@@ -23,9 +23,10 @@ const Home = () => {
     const [imageUrl, setImageUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [callCount, setCallCount] = useState(0);
+    const [displayQuery, setDisplayQuery] = useState("");
 
     useEffect(() => {
-        Aos.init({duration:1000});
+        Aos.init({ duration: 1000 });
     }, [])
 
     useEffect(() => {
@@ -79,6 +80,7 @@ const Home = () => {
     const handleSubmit = async () => {
         setImageUrl('');
         if (callCount < 3) {
+            setDisplayQuery(query);
             setIsLoading(true);
             try {
                 const response = await axios.post(
@@ -152,6 +154,9 @@ const Home = () => {
                         {imageUrl && <img src={imageUrl} alt="" style={{
                             border: `0.1px solid ${highlightColor}`
                         }} className={styles.image} />}
+                        {imageUrl && <span className={styles.desc}>
+                            {displayQuery}
+                        </span>}
                     </div>
                     <div className={styles.row} data-aos="fade-up">
                         <div className={styles.actionRow}>
